@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タイマー</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100dvh;
+      background: #111;
+      color: #fff;
+      font-family: 'Helvetica Neue', sans-serif;
+      user-select: none;
+    }
+
+    #display {
+      font-size: 22vw;
+      font-weight: 100;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #controls {
+      display: flex;
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    button {
+      width: 5rem;
+      height: 5rem;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:active { opacity: 0.6; }
+
+    #startStop {
+      background: #fff;
+      color: #111;
+      width: 6rem;
+      height: 6rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    #reset {
+      background: #333;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="display">00:00</div>
+  <div id="controls">
+    <button id="reset">リセット</button>
+    <button id="startStop">開始</button>
+  </div>
+
+  <script>
+    let elapsed = 0;
+    let interval = null;
+    let running = false;
+
+    const display = document.getElementById('display');
+    const startStop = document.getElementById('startStop');
+    const reset = document.getElementById('reset');
+
+    function format(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      const h = Math.floor(m / 60);
+      if (h > 0) {
+        return `${String(h).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      }
+      return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    }
+
+    startStop.addEventListener('click', () => {
+      if (running) {
+        clearInterval(interval);
+        running = false;
+        startStop.textContent = '再開';
+      } else {
+        const start = Date.now() - elapsed;
+        interval = setInterval(() => {
+          elapsed = Date.now() - start;
+          display.textContent = format(elapsed);
+        }, 100);
+        running = true;
+        startStop.textContent = '停止';
+      }
+    });
+
+    reset.addEventListener('click', () => {
+      clearInterval(interval);
+      running = false;
+      elapsed = 0;
+      display.textContent = '00:00';
+      startStop.textContent = '開始';
+    });
+  </script>
+</body>
+</html>
