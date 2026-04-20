@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>キオクシア株価</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100dvh;
+      background: #111;
+      color: #fff;
+      font-family: 'Helvetica Neue', sans-serif;
+    }
+
+    #name {
+      font-size: 5vw;
+      color: #888;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    #price {
+      font-size: 20vw;
+      font-weight: 100;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    #change {
+      font-size: 5vw;
+      margin-top: 0.5rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #change.up   { color: #4caf50; }
+    #change.down { color: #f44336; }
+
+    #updated {
+      font-size: 2.5vw;
+      color: #555;
+      margin-top: 2rem;
+    }
+
+    #error {
+      font-size: 3vw;
+      color: #f44336;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="name">キオクシア (6600)</div>
+  <div id="price">---</div>
+  <div id="change">---</div>
+  <div id="updated"></div>
+  <div id="error">データ取得に失敗しました</div>
+
+  <script>
+    const priceEl   = document.getElementById('price');
+    const changeEl  = document.getElementById('change');
+    const updatedEl = document.getElementById('updated');
+    const errorEl   = document.getElementById('error');
+
+    async function fetchPrice() {
+      try {
+        const res = await fetch(
+          'https://query2.finance.yahoo.com/v8/finance/chart/6600.T?interval=1d&range=1d',
+          { headers: { 'Accept': 'application/json' } }
+        );
+        const json = await res.json();
+        const meta = json.chart.result[0].meta;
+
+        const price  = meta.regularMarketPrice;
+        const prev   = meta.previousClose ?? meta.chartPreviousClose;
+        const diff   = price - prev;
+        const pct    = (diff / prev) * 100;
+        const sign   = diff >= 0 ? '+' : '';
+
+        priceEl.textContent  = `¥${price.toLocaleString()}`;
+        changeEl.textContent = `${sign}${diff.toFixed(0)} (${sign}${pct.toFixed(2)}%)`;
+        changeEl.className   = diff >= 0 ? 'up' : 'down';
+
+        const now = new Date();
+        updatedEl.textContent = `更新: ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+        errorEl.style.display = 'none';
+      } catch {
+        errorEl.style.display = 'block';
+      }
+    }
+
+    fetchPrice();
+    setInterval(fetchPrice, 30000);
+  </script>
+</body>
+</html>
