@@ -67,12 +67,23 @@
     const updatedEl = document.getElementById('updated');
     const errorEl   = document.getElementById('error');
 
+    const YAHOO_URL = 'https://query2.finance.yahoo.com/v8/finance/chart/6600.T?interval=1d&range=1d';
+    const PROXY    = 'https://corsproxy.io/?url=';
+
+    async function tryFetch(url, opts) {
+      const res = await fetch(url, opts);
+      if (!res.ok) throw new Error(res.status);
+      return res;
+    }
+
     async function fetchPrice() {
       try {
-        const res = await fetch(
-          'https://query2.finance.yahoo.com/v8/finance/chart/6600.T?interval=1d&range=1d',
-          { headers: { 'Accept': 'application/json' } }
-        );
+        let res;
+        try {
+          res = await tryFetch(YAHOO_URL, { headers: { Accept: 'application/json' } });
+        } catch {
+          res = await tryFetch(PROXY + encodeURIComponent(YAHOO_URL), {});
+        }
         const json = await res.json();
         const meta = json.chart.result[0].meta;
 
