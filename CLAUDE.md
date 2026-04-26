@@ -1,47 +1,47 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルは、リポジトリ内のコードを操作する際に Claude Code（claude.ai/code）へ提供するガイダンスです。
 
-## Project Overview
+## プロジェクト概要
 
-A suite of four standalone single-file web utility apps targeting Japanese users, served as static HTML:
+日本語ユーザー向けの、スタンドアロンな単一ファイル Web ユーティリティアプリ 4 本を静的 HTML として提供するスイートです。
 
-- `index.html` — Landing page
-- `clock.html` — Digital clock with Japanese calendar format
-- `timer.html` — Fullscreen stopwatch
-- `kioxia.html` — Real-time Kioxia (6600.JP) stock price display
+- `index.html` — ランディングページ
+- `clock.html` — 和暦形式対応のデジタル時計
+- `timer.html` — フルスクリーンストップウォッチ
+- `kioxia.html` — キオクシア（6600.JP）株価のリアルタイム表示
 
-## Running Locally
+## ローカルでの実行
 
-No build step required. Serve the files with any static HTTP server:
+ビルド手順は不要です。任意の静的 HTTP サーバーでファイルを配信してください。
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then visit `http://localhost:8000`.
+その後 `http://localhost:8000` にアクセスします。
 
-## Architecture
+## アーキテクチャ
 
-Each file is entirely self-contained (HTML + inline CSS + inline `<script>`). There is no shared code, no bundler, and no external libraries—everything is vanilla ES6+ and browser-native APIs.
+各ファイルは完全に自己完結しています（HTML＋インライン CSS＋インライン `<script>`）。共有コード、バンドラー、外部ライブラリは一切なく、すべてバニラ ES6＋とブラウザネイティブ API で実装されています。
 
-### Conventions
+### 規約
 
-- Language attribute: `lang="ja"` on all pages
-- Dark theme default: `#111` background, white text
-- Layout: `flexbox` with viewport units (`vw`, `dvh`) for responsive full-screen layouts
-- CSS reset at top of every `<style>`: `* { margin: 0; padding: 0; box-sizing: border-box; }`
-- DOM element IDs: camelCase (`timeEl`, `priceEl`, `changeEl`)
-- Functions: camelCase (`fetchStooq`, `fetchDirect`)
-- Real-time updates via `setInterval`
-- Async data fetching via `fetch` with `async/await` and `try/catch`
+- 言語属性：全ページに `lang="ja"`
+- デフォルトはダークテーマ：背景 `#111`、文字色ホワイト
+- レイアウト：レスポンシブなフルスクリーン対応のため `flexbox` とビューポート単位（`vw`、`dvh`）を使用
+- 各 `<style>` の先頭に CSS リセット：`* { margin: 0; padding: 0; box-sizing: border-box; }`
+- DOM 要素 ID：キャメルケース（`timeEl`、`priceEl`、`changeEl`）
+- 関数名：キャメルケース（`fetchStooq`、`fetchDirect`）
+- リアルタイム更新は `setInterval` を使用
+- 非同期データ取得は `fetch` と `async/await`、`try/catch` を使用
 
-### Stock Data Fetching (kioxia.html)
+### 株価データの取得（kioxia.html）
 
-Uses a three-source fallback chain to work around CORS restrictions:
+CORS 制限を回避するため、3 つのソースによるフォールバックチェーンを使用しています。
 
-1. **Stooq API** (`stooq.com/q/l/?s=6600.jp`) — primary, no CORS issues
-2. **allorigins.win proxy** — wraps Yahoo Finance to bypass CORS
-3. **Yahoo Finance direct** (`query1.finance.yahoo.com`) — last resort
+1. **Stooq API**（`stooq.com/q/l/?s=6600.jp`）— 第一優先、CORS 問題なし
+2. **allorigins.win プロキシ** — CORS 回避のため Yahoo Finance をラップ
+3. **Yahoo Finance 直接接続**（`query1.finance.yahoo.com`）— 最終手段
 
-Color classes `.up` / `.down` are toggled on `#change` to style price movement.
+`#change` 要素に `.up` / `.down` カラークラスをトグルして株価の変動をスタイリングします。
